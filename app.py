@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # --- SIDEBAR: NAVIGATION & API KEY ---
-st.sidebar.header("Navigation")  # Fixed: Uses parentheses, not equals sign
+st.sidebar.header("Navigation") 
 app_mode = st.sidebar.radio("Choose Tool:", ["📸 Photo Analysis AI", "nyc_search_tool_icon NYC Address Lookup"])
 
 st.sidebar.divider()
@@ -182,6 +182,9 @@ elif app_mode == "📸 Photo Analysis AI":
             st.error("Please enter your OpenAI API Key in the sidebar.")
         else:
             with st.spinner("AI is analyzing..."):
+                # --- DISPLAY UPLOADED IMAGE (Added Back) ---
+                st.image(uploaded_file, caption="Your Uploaded Photo", use_column_width=True)
+                
                 user_context = {"scratch": scratch_result, "magnet": magnet_result}
                 result, error = analyze_image_with_ai(uploaded_file.getvalue(), user_context, api_key)
                 
