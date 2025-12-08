@@ -13,7 +13,8 @@ st.set_page_config(
 
 # --- SIDEBAR: NAVIGATION & API KEY ---
 st.sidebar.header("Navigation") 
-app_mode = st.sidebar.radio("Choose Tool:", ["📸 Photo Analysis AI", "nyc_search_tool_icon NYC Address Lookup"])
+# Fixed: Changed "nyc_search_tool_icon" to a proper emoji
+app_mode = st.sidebar.radio("Choose Tool:", ["📸 Photo Analysis AI", "🔎 NYC Address Lookup"])
 
 st.sidebar.divider()
 st.sidebar.header("Configuration")
@@ -22,7 +23,7 @@ api_key = st.sidebar.text_input("OpenAI API Key (for Photo AI)", type="password"
 # ==========================================
 # PAGE 1: NYC ADDRESS LOOKUP
 # ==========================================
-if app_mode == "nyc_search_tool_icon NYC Address Lookup":
+if app_mode == "🔎 NYC Address Lookup":
     st.title("NYC Lead Service Line Lookup")
     st.markdown("Check the official NYC DEP records for your building's service line data.")
     
@@ -53,7 +54,7 @@ if app_mode == "nyc_search_tool_icon NYC Address Lookup":
         except Exception as e:
             return None, str(e)
 
-    # --- FIXED LOGIC HERE ---
+    # --- STATUS NORMALIZATION LOGIC ---
     def normalize_status(material_str):
         if not material_str: return "UNKNOWN"
         s = str(material_str).lower()
@@ -64,7 +65,7 @@ if app_mode == "nyc_search_tool_icon NYC Address Lookup":
         if "plastic" in s: return "NON_LEAD"
         if "brass" in s: return "NON_LEAD"
         
-        # 2. Check for UNKNOWN (Fix for "Unknown - Lead Status Unknown")
+        # 2. Check for UNKNOWN
         if "unknown" in s: return "UNKNOWN"
 
         # 3. Check for LEAD (Only if not unknown)
@@ -76,7 +77,8 @@ if app_mode == "nyc_search_tool_icon NYC Address Lookup":
         return "UNKNOWN"
 
     # --- UI FOR SEARCH ---
-    st.info("💡 Tip: Enter the street number and name (e.g., '3029 1 AVE').")
+    # Fixed: Updated the example address
+    st.info("💡 Tip: Enter the street number and name (e.g., '30-29 33 STREET').")
     address_input = st.text_input("Enter NYC Address:")
 
     if st.button("Search Database"):
