@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # --- SIDEBAR: NAVIGATION & API KEY ---
-st.sidebar.header("Navigation")
+st.sidebar.header("Navigation")  # Fixed: Uses parentheses, not equals sign
 app_mode = st.sidebar.radio("Choose Tool:", ["📸 Photo Analysis AI", "nyc_search_tool_icon NYC Address Lookup"])
 
 st.sidebar.divider()
@@ -20,24 +20,21 @@ st.sidebar.header("Configuration")
 api_key = st.sidebar.text_input("OpenAI API Key (for Photo AI)", type="password")
 
 # ==========================================
-# PAGE 1: NYC ADDRESS LOOKUP (The New Code)
+# PAGE 1: NYC ADDRESS LOOKUP
 # ==========================================
 if app_mode == "nyc_search_tool_icon NYC Address Lookup":
     st.title("NYC Lead Service Line Lookup")
     st.markdown("Check the official NYC DEP records for your building's service line data.")
     
-    # --- HELPER FUNCTION (Ported from your Node.js code) ---
+    # --- HELPER FUNCTION ---
     def fetch_nyc_data(address_query):
-        # The URL from your provided code
         DEP_URL = "https://services.arcgis.com/at3rDjch5X7i9Bag/arcgis/rest/services/NYC_WaterConnection_DEP24V10_202410_PG_REV3/FeatureServer/0/query"
         
-        # Normalize address (naive normalization)
         safe_address = address_query.strip().upper().replace("'", "''")
         
-        # Build Query Parameters
         params = {
             "f": "json",
-            "where": f"UPPER(Address) LIKE '{safe_address}%'", # LIKE query
+            "where": f"UPPER(Address) LIKE '{safe_address}%'",
             "outFields": "Address,TBBL,Material,City_Owned,Record_Typ",
             "returnGeometry": "false",
             "spatialRel": "esriSpatialRelIntersects"
@@ -51,7 +48,6 @@ if app_mode == "nyc_search_tool_icon NYC Address Lookup":
             if not data.get("features"):
                 return None, "No matching record found."
             
-            # Return the first match's attributes
             return data["features"][0]["attributes"], None
             
         except Exception as e:
@@ -62,7 +58,7 @@ if app_mode == "nyc_search_tool_icon NYC Address Lookup":
         s = str(material_str).lower()
         if "lead" in s: return "LEAD"
         if any(x in s for x in ["copper", "plastic", "non-lead"]): return "NON_LEAD"
-        if "galv" in s: return "POSSIBLE_LEAD" # Galvanized often requires check
+        if "galv" in s: return "POSSIBLE_LEAD"
         return "UNKNOWN"
 
     # --- UI FOR SEARCH ---
@@ -79,14 +75,12 @@ if app_mode == "nyc_search_tool_icon NYC Address Lookup":
                 if error:
                     st.error(f"❌ Result: {error}")
                 else:
-                    # Parse results
                     raw_material = attributes.get("Material", "Unknown")
                     status = normalize_status(raw_material)
                     full_address = attributes.get("Address", address_input)
                     
                     st.divider()
                     
-                    # Display Status with Color
                     if status == "LEAD":
                         st.error(f"⚠️ RECORD FOUND: LEAD")
                         st.write(f"The city records indicate **{raw_material}**.")
@@ -98,19 +92,16 @@ if app_mode == "nyc_search_tool_icon NYC Address Lookup":
                     else:
                         st.info(f"❓ RECORD FOUND: UNKNOWN MATERIAL")
                     
-                    # Data Table
                     st.json({
                         "Address": full_address,
                         "Reported Material": raw_material,
                         "Record Type": attributes.get("Record_Typ"),
                         "City Owned": attributes.get("City_Owned")
                     })
-                    
                     st.caption("Data Source: NYC DEP Open Data (ArcGIS)")
 
-
 # ==========================================
-# PAGE 2: PHOTO ANALYSIS AI (Previous Code)
+# PAGE 2: PHOTO ANALYSIS AI
 # ==========================================
 elif app_mode == "📸 Photo Analysis AI":
     st.title("📸 PipeCheck AI")
@@ -122,7 +113,6 @@ elif app_mode == "📸 Photo Analysis AI":
 
     st.divider()
 
-    # --- STEP 1: EDUCATE & PREPARE ---
     st.subheader("1. Prepare the Pipe")
     st.info("""
     **Scratch Test Instructions:**
@@ -131,10 +121,8 @@ elif app_mode == "📸 Photo Analysis AI":
     3. Check if a magnet sticks.
     """)
     
-    # VISUAL AID
     st.image("https://www.epa.gov/sites/default/files/styles/large/public/2016-01/lead-copper-galv-pipes.jpg?itok=5w_Zou_B", caption="Visual guide: Lead (left) vs Copper (middle) vs Galvanized (right).", use_column_width=True)
 
-    # --- STEP 2: USER INPUTS ---
     col1, col2 = st.columns(2)
     with col1:
         scratch_result = st.selectbox("Scratch Test Color", ["I didn't scratch it", "Shiny Silver", "Penny/Copper Color", "Dull Gray/No Change"])
@@ -143,8 +131,8 @@ elif app_mode == "📸 Photo Analysis AI":
 
     uploaded_file = st.file_uploader("Upload a clear photo", type=["jpg", "png", "jpeg"])
 
-    # --- CORE LOGIC ---
     def analyze_image_with_ai(image_bytes, user_notes, key):
+        if not key: return None, "Missing API Key"
         client = OpenAI(api_key=key)
         base64_image = base64.b64encode(image_bytes).decode('utf-8')
         
