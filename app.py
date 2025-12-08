@@ -53,12 +53,23 @@ if app_mode == "nyc_search_tool_icon NYC Address Lookup":
         except Exception as e:
             return None, str(e)
 
+    # --- FIXED LOGIC HERE ---
     def normalize_status(material_str):
         if not material_str: return "UNKNOWN"
         s = str(material_str).lower()
+        
+        # 1. Check for SAFE materials first (including "non-lead")
+        if "non-lead" in s: return "NON_LEAD"
+        if "copper" in s: return "NON_LEAD"
+        if "plastic" in s: return "NON_LEAD"
+        if "brass" in s: return "NON_LEAD"
+        
+        # 2. NOW check for lead (since we ruled out "non-lead")
         if "lead" in s: return "LEAD"
-        if any(x in s for x in ["copper", "plastic", "non-lead"]): return "NON_LEAD"
+        
+        # 3. Check for ambiguous/risky
         if "galv" in s: return "POSSIBLE_LEAD"
+        
         return "UNKNOWN"
 
     # --- UI FOR SEARCH ---
@@ -182,7 +193,6 @@ elif app_mode == "📸 Photo Analysis AI":
             st.error("Please enter your OpenAI API Key in the sidebar.")
         else:
             with st.spinner("AI is analyzing..."):
-                # --- DISPLAY UPLOADED IMAGE (Added Back) ---
                 st.image(uploaded_file, caption="Your Uploaded Photo", use_column_width=True)
                 
                 user_context = {"scratch": scratch_result, "magnet": magnet_result}
