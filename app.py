@@ -58,16 +58,19 @@ if app_mode == "nyc_search_tool_icon NYC Address Lookup":
         if not material_str: return "UNKNOWN"
         s = str(material_str).lower()
         
-        # 1. Check for SAFE materials first (including "non-lead")
+        # 1. Check for SAFE materials first
         if "non-lead" in s: return "NON_LEAD"
         if "copper" in s: return "NON_LEAD"
         if "plastic" in s: return "NON_LEAD"
         if "brass" in s: return "NON_LEAD"
         
-        # 2. NOW check for lead (since we ruled out "non-lead")
+        # 2. Check for UNKNOWN (Fix for "Unknown - Lead Status Unknown")
+        if "unknown" in s: return "UNKNOWN"
+
+        # 3. Check for LEAD (Only if not unknown)
         if "lead" in s: return "LEAD"
         
-        # 3. Check for ambiguous/risky
+        # 4. Check for ambiguous/risky
         if "galv" in s: return "POSSIBLE_LEAD"
         
         return "UNKNOWN"
